@@ -43,6 +43,22 @@ void print_test_name(TestCase* tc) {
 	printf("We have a test named '%s'\n", tc->name);
 }
 
+char* string_builder(char* format, ...) {
+	va_list ap1;
+	va_start(ap1, format);
+	va_list ap2;
+	va_copy(ap2,ap1);
+	char* empty_string = "";
+	size_t size_of_empty_string = 0;
+	int num_chars_needed = vsnprintf(empty_string, size_of_empty_string, format, ap1);
+	va_end(ap1);
+	size_t output_region_size = sizeof(char) * (num_chars_needed + 1); //Include room for \0 character
+	char* safe_output_region = (char*)malloc(output_region_size);
+	vsprintf(safe_output_region, format, ap2);
+	va_end(ap2);
+	return safe_output_region;
+}
+
 static int num_failures = 0;
 char* test_executable_path;
 // ANSI Color stuff stolen gleefully from http://stackoverflow.com/questions/3219393/stdlib-and-colored-output-in-c
@@ -121,3 +137,11 @@ void run_test(TestCase* tc) {
 		body\
 	}
 #define suspect_assert(message, expr) do { if (!(expr)) { test_passed = NOPE; exit_msg = message;}} while (0);
+#define suspect_epsilon(actual, epsilon, target)\
+       	do {\
+	       	if (!((actual >= target - epsilon) && (actual <= target + epsilon))) {\
+		       	test_passed = NOPE;\
+		       	char* exit_msg_format = "Expected "#actual" in B_{"#epsilon"}("#target"), but %f \\notin [%f,%f]";\
+			exit_msg = string_builder(exit_msg_format,actual,target - epsilon, target + epsilon);\
+		}\
+	} while(0);
