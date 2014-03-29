@@ -144,4 +144,4 @@ void run_test(TestCase* tc) {
 		       	char* exit_msg_format = "Expected "#actual" in B_{"#epsilon"}("#target"), but %f \\notin [%f,%f]";\
 			exit_msg = string_builder(exit_msg_format,actual,target - epsilon, target + epsilon);\
 		}\
-	}\ while(0);
+	} while(0);
